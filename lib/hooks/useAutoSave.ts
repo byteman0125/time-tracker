@@ -5,7 +5,7 @@ export function useAutoSave<T>(
   onSave: (value: T) => void | Promise<void>,
   delay: number = 3000
 ) {
-  const timeoutRef = useRef<NodeJS.Timeout>();
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
   const previousValueRef = useRef<T>(value);
 
   useEffect(() => {
