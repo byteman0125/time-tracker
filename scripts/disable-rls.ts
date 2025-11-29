@@ -43,10 +43,11 @@ async function disableRLS() {
     `);
 
     console.log("\n📊 RLS Status:");
-    const rows = Array.from(result) as unknown as Array<{ tablename: string; rowsecurity: boolean }>;
-    for (const row of rows) {
-      const status = row.rowsecurity ? "⚠️  Still Enabled" : "✅ Disabled";
-      console.log(`  ${row.tablename}: ${status}`);
+    for (const row of result) {
+      const tablename = (row as any).tablename as string;
+      const rowsecurity = (row as any).rowsecurity as boolean;
+      const status = rowsecurity ? "⚠️  Still Enabled" : "✅ Disabled";
+      console.log(`  ${tablename}: ${status}`);
     }
 
     console.log("\n✨ RLS disabled successfully!");
