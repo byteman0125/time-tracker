@@ -1,0 +1,11 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+- Make code and file structure professionally that can use resuable.
+- You have to save requirements to Requirement.md file and everytime you should update that.
+- If I give you command, Before start coding, you should show current state and your plan and if I give command "do" you should start code.
+- Requre ments should be include details logic, file structure, deep dive, etc.
+- Make UI beautifully, professionally well designed, and use best color and consider UX every time..
+- Consider high performance, cutting edge, trade off, low latency.
