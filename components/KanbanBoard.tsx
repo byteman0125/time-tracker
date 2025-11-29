@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { InterviewCard } from "./InterviewCard";
 import type { interviews, interviewSteps } from "@/lib/db/schema";
 import type { ProfileOption } from "@/lib/types/profile";
@@ -21,7 +22,16 @@ interface KanbanBoardProps {
   profileMap: Record<string, ProfileOption>;
 }
 
-export function KanbanBoard({
+const columnThemes = [
+  "from-sky-400/20 via-sky-900/30 to-slate-950/70 border-sky-500/20",
+  "from-emerald-400/20 via-emerald-900/40 to-slate-950/70 border-emerald-500/20",
+  "from-amber-400/25 via-amber-900/30 to-slate-950/70 border-amber-500/20",
+  "from-violet-400/25 via-violet-900/30 to-slate-950/70 border-violet-500/25",
+  "from-rose-400/25 via-rose-900/30 to-slate-950/70 border-rose-500/20",
+  "from-cyan-400/25 via-cyan-900/30 to-slate-950/70 border-cyan-500/20",
+];
+
+function KanbanBoardComponent({
   steps,
   interviewsByStep,
   onEdit,
@@ -30,15 +40,6 @@ export function KanbanBoard({
   onStatusChange,
   profileMap,
 }: KanbanBoardProps) {
-  const columnThemes = [
-    "from-sky-400/20 via-sky-900/30 to-slate-950/70 border-sky-500/20",
-    "from-emerald-400/20 via-emerald-900/40 to-slate-950/70 border-emerald-500/20",
-    "from-amber-400/25 via-amber-900/30 to-slate-950/70 border-amber-500/20",
-    "from-violet-400/25 via-violet-900/30 to-slate-950/70 border-violet-500/25",
-    "from-rose-400/25 via-rose-900/30 to-slate-950/70 border-rose-500/20",
-    "from-cyan-400/25 via-cyan-900/30 to-slate-950/70 border-cyan-500/20",
-  ];
-
   const orderedSteps = steps.slice().sort((a, b) => a.order - b.order);
 
   return (
@@ -96,4 +97,6 @@ export function KanbanBoard({
     </div>
   );
 }
+
+export const KanbanBoard = memo(KanbanBoardComponent);
 

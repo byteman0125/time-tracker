@@ -1,5 +1,6 @@
 "use client";
 
+import { memo } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,7 @@ const statusColorMap: Record<Interview["status"], string> = {
   canceled: "bg-rose-500/20 text-rose-200",
 };
 
-export function InterviewCard({
+function InterviewCardComponent({
   interview,
   step,
   profile,
@@ -161,4 +162,6 @@ export function InterviewCard({
     </Card>
   );
 }
+
+export const InterviewCard = memo(InterviewCardComponent);
 

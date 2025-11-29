@@ -27,6 +27,7 @@ export default function DashboardPage() {
   const [selectedInterview, setSelectedInterview] = useState<Interview | null>(null);
   const [timeEntries, setTimeEntries] = useState<any[]>([]);
   const [transcriptions, setTranscriptions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
   const [metrics, setMetrics] = useState({
     today: 0,
     week: 0,
@@ -128,6 +129,7 @@ export default function DashboardPage() {
 
   const loadData = useCallback(async () => {
     try {
+      setLoading(true);
       const response = await fetch("/api/interviews");
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -140,12 +142,18 @@ export default function DashboardPage() {
       
       if (data.error) {
         console.error("API error:", data.error);
+        setSteps([]);
+        setDisplayInterviewsByStep({});
+        setRawInterviewsByStep({});
         return;
       }
       
-      setSteps(Array.isArray(data.steps) ? data.steps : []);
-      setRawInterviewsByStep(data.interviewsByStep || {});
-      setDisplayInterviewsByStep(data.interviewsByStep || {});
+      const stepsData = Array.isArray(data.steps) ? data.steps : [];
+      const interviewsData = data.interviewsByStep || {};
+      
+      setSteps(stepsData);
+      setRawInterviewsByStep(interviewsData);
+      setDisplayInterviewsByStep(interviewsData);
       setMetrics(data.metrics || {
         today: 0,
         week: 0,
@@ -158,8 +166,11 @@ export default function DashboardPage() {
     } catch (error) {
       console.error("Error loading data:", error);
       // Set safe defaults on error
+      setSteps([]);
       setDisplayInterviewsByStep({});
       setRawInterviewsByStep({});
+    } finally {
+      setLoading(false);
     }
   }, []);
 
@@ -360,22 +371,38 @@ export default function DashboardPage() {
         </div>
 
         <div className="flex-1 min-h-0 overflow-hidden">
-          <KanbanBoard
-            steps={steps}
-            interviewsByStep={filteredInterviewsByStep}
-            profileMap={profileMap}
-            onEdit={(id) => {
-              const interview = Object.values(displayInterviewsByStep)
-                .flat()
-                .find((item) => item.id === id);
-              setEditingCard(interview || null);
-            }}
-            onCardClick={handleCardClick}
-            onCardDoubleClick={(id) => {
-              window.location.href = `/interviews/${id}/edit`;
-            }}
-            onStatusChange={handleStatusChange}
-          />
+          {loading && steps.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent"></div>
+                <p className="text-slate-400">Loading boards...</p>
+              </div>
+            </div>
+          ) : steps.length === 0 ? (
+            <div className="flex h-full items-center justify-center">
+              <div className="text-center">
+                <p className="text-slate-400 mb-2">No interview stages found</p>
+                <p className="text-sm text-slate-500">Stages will be created automatically</p>
+              </div>
+            </div>
+          ) : (
+            <KanbanBoard
+              steps={steps}
+              interviewsByStep={filteredInterviewsByStep}
+              profileMap={profileMap}
+              onEdit={(id) => {
+                const interview = Object.values(displayInterviewsByStep)
+                  .flat()
+                  .find((item) => item.id === id);
+                setEditingCard(interview || null);
+              }}
+              onCardClick={handleCardClick}
+              onCardDoubleClick={(id) => {
+                window.location.href = `/interviews/${id}/edit`;
+              }}
+              onStatusChange={handleStatusChange}
+            />
+          )}
         </div>
 
         {selectedInterview && (
