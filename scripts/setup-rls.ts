@@ -61,7 +61,8 @@ async function setupRLS() {
     `);
 
     console.log("\n📊 RLS Status:");
-    for (const row of result as Array<{ tablename: string; rowsecurity: boolean }>) {
+    const rows = Array.from(result) as unknown as Array<{ tablename: string; rowsecurity: boolean }>;
+    for (const row of rows) {
       const status = row.rowsecurity ? "✅ Enabled" : "❌ Disabled";
       console.log(`  ${row.tablename}: ${status}`);
     }
