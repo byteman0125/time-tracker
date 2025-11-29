@@ -5,7 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { LayoutDashboard, CalendarDays, UserCircle2, BarChart3, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import type { StoredProfile } from "@/lib/types/profile";
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { Logo } from "@/components/Logo";
 
 const PROFILE_STORAGE_KEY = "profiles";
@@ -24,7 +24,7 @@ const mainItems: NavItem[] = [
   { href: "/prompts", label: "Prompts", icon: MessageSquare },
 ];
 
-export function LeftNav() {
+function ProfileList() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const [profiles, setProfiles] = useState<StoredProfile[]>([]);
@@ -41,6 +41,47 @@ export function LeftNav() {
   }, []);
 
   const activeProfileId = searchParams.get("profileId");
+
+  return (
+    <div className="space-y-2">
+      <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+        Profiles
+      </p>
+      {profiles.length === 0 ? (
+        <p className="px-3 text-[11px] text-slate-500">
+          No profiles yet. Create one in the Profiles page.
+        </p>
+      ) : (
+        <div className="space-y-1">
+          {profiles.map((profile) => {
+            const isActiveProfile =
+              pathname.startsWith("/profile") && activeProfileId === profile.id;
+            return (
+              <Link
+                key={profile.id}
+                href={`/profile?profileId=${profile.id}`}
+                className={cn(
+                  "flex items-center justify-between rounded-xl px-3 py-1.5 text-[11px] transition-colors",
+                  isActiveProfile
+                    ? "bg-primary/20 text-primary-foreground ring-1 ring-primary/40"
+                    : "text-slate-300 hover:bg-slate-800/70 hover:text-white"
+                )}
+              >
+                <span className="truncate">{profile.name || "Unnamed"}</span>
+                <span className="ml-2 text-[10px] text-slate-400">
+                  {profile.personalInfo?.location || profile.email || ""}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function LeftNav() {
+  const pathname = usePathname();
 
   return (
     <aside className="hidden h-screen w-64 flex-shrink-0 border-r border-white/10 bg-slate-950/95 text-sm text-slate-200 md:flex md:flex-col">
@@ -77,40 +118,16 @@ export function LeftNav() {
           })}
         </div>
 
-        <div className="space-y-2">
-          <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
-            Profiles
-          </p>
-          {profiles.length === 0 ? (
-            <p className="px-3 text-[11px] text-slate-500">
-              No profiles yet. Create one in the Profiles page.
+        <Suspense fallback={
+          <div className="space-y-2">
+            <p className="px-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-slate-500">
+              Profiles
             </p>
-          ) : (
-            <div className="space-y-1">
-              {profiles.map((profile) => {
-                const isActiveProfile =
-                  pathname.startsWith("/profile") && activeProfileId === profile.id;
-                return (
-                  <Link
-                    key={profile.id}
-                    href={`/profile?profileId=${profile.id}`}
-                    className={cn(
-                      "flex items-center justify-between rounded-xl px-3 py-1.5 text-[11px] transition-colors",
-                      isActiveProfile
-                        ? "bg-primary/20 text-primary-foreground ring-1 ring-primary/40"
-                        : "text-slate-300 hover:bg-slate-800/70 hover:text-white"
-                    )}
-                  >
-                    <span className="truncate">{profile.name || "Unnamed"}</span>
-                    <span className="ml-2 text-[10px] text-slate-400">
-                      {profile.personalInfo?.location || profile.email || ""}
-                    </span>
-                  </Link>
-                );
-              })}
-            </div>
-          )}
-        </div>
+            <p className="px-3 text-[11px] text-slate-500">Loading...</p>
+          </div>
+        }>
+          <ProfileList />
+        </Suspense>
       </nav>
     </aside>
   );
