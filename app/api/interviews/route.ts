@@ -122,10 +122,20 @@ export async function GET() {
   } catch (error) {
     console.error("Error fetching interviews:", error);
     const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    
+    // Log more details in production for debugging
+    if (process.env.NODE_ENV === "production") {
+      console.error("Error details:", {
+        message: errorMessage,
+        stack: error instanceof Error ? error.stack : undefined,
+        hasDatabaseUrl: !!process.env.DATABASE_URL,
+      });
+    }
+    
     return NextResponse.json(
       { 
         error: "Failed to fetch interviews",
-        details: errorMessage,
+        details: process.env.NODE_ENV === "development" ? errorMessage : "Internal server error",
         steps: [],
         interviewsByStep: {},
         metrics: {

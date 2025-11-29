@@ -11,4 +11,4 @@ alwaysApply: true
 - Consider high performance, cutting edge, trade off, low latency.
 - Requirement shuold be detailed (including all actions and behavioral), not simple
 - You should git push when I give permission
-- Git commit should feature by feature, and commit message should be one line that can be explained core feature.
+- Git commit should feature by feature, and commit message should be one line and so short that can be explained core feature.
