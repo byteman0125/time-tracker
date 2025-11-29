@@ -7,6 +7,9 @@ export async function GET() {
   try {
     // Ensure default pipeline stages exist
     let existingSteps = await getInterviewSteps();
+    if (!Array.isArray(existingSteps)) {
+      existingSteps = [];
+    }
     const defaultStages = [
       "Intro",
       "Recruiter Screen",
@@ -68,9 +71,16 @@ export async function GET() {
     }
 
     const steps = await getInterviewSteps();
+    if (!Array.isArray(steps)) {
+      throw new Error("Failed to fetch interview steps");
+    }
+
     const reminderStep = steps.find((s) => s.name === "Reminder");
 
     let allInterviews = await getAllInterviews();
+    if (!Array.isArray(allInterviews)) {
+      allInterviews = [];
+    }
 
     if (reminderStep) {
       const moves = allInterviews
@@ -84,6 +94,9 @@ export async function GET() {
       if (moves.length) {
         await Promise.all(moves);
         allInterviews = await getAllInterviews();
+        if (!Array.isArray(allInterviews)) {
+          allInterviews = [];
+        }
       }
     }
 
@@ -108,7 +121,25 @@ export async function GET() {
     });
   } catch (error) {
     console.error("Error fetching interviews:", error);
-    return NextResponse.json({ error: "Failed to fetch interviews" }, { status: 500 });
+    const errorMessage = error instanceof Error ? error.message : "Unknown error";
+    return NextResponse.json(
+      { 
+        error: "Failed to fetch interviews",
+        details: errorMessage,
+        steps: [],
+        interviewsByStep: {},
+        metrics: {
+          today: 0,
+          week: 0,
+          month: 0,
+          total: 0,
+          done: 0,
+          passRate: 0,
+        },
+        reminderCount: 0,
+      },
+      { status: 500 }
+    );
   }
 }
 

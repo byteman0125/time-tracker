@@ -77,7 +77,11 @@ export default function DashboardPage() {
 
   const filteredInterviewsByStep = useMemo(() => {
     const map: Record<string, Interview[]> = {};
+    if (!displayInterviewsByStep || typeof displayInterviewsByStep !== 'object') {
+      return map;
+    }
     for (const [stepId, interviews] of Object.entries(displayInterviewsByStep)) {
+      if (!Array.isArray(interviews)) continue;
       let filtered = interviews.filter(
         (interview) =>
           interview.interviewDate >= viewRange.start &&
@@ -125,14 +129,37 @@ export default function DashboardPage() {
   const loadData = useCallback(async () => {
     try {
       const response = await fetch("/api/interviews");
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        throw new Error("Response is not JSON");
+      }
       const data = await response.json();
-      setSteps(data.steps);
-      setRawInterviewsByStep(data.interviewsByStep);
-      setDisplayInterviewsByStep(data.interviewsByStep);
-      setMetrics(data.metrics);
+      
+      if (data.error) {
+        console.error("API error:", data.error);
+        return;
+      }
+      
+      setSteps(Array.isArray(data.steps) ? data.steps : []);
+      setRawInterviewsByStep(data.interviewsByStep || {});
+      setDisplayInterviewsByStep(data.interviewsByStep || {});
+      setMetrics(data.metrics || {
+        today: 0,
+        week: 0,
+        month: 0,
+        total: 0,
+        done: 0,
+        passRate: 0,
+      });
       setReminderCount(data.reminderCount || 0);
     } catch (error) {
       console.error("Error loading data:", error);
+      // Set safe defaults on error
+      setDisplayInterviewsByStep({});
+      setRawInterviewsByStep({});
     }
   }, []);
 
